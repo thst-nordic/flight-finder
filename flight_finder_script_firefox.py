@@ -5,6 +5,8 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time, os
 # import selenium.webdriver.chrome.service as service
+from pyvirtualdisplay import Display
+from selenium import webdriver
 
 
 """Login to Gmail and send notification email with body (msg)."""
@@ -39,7 +41,7 @@ def checkOpodo(searchURL,maxPrice,username,password):
     # if price < minPrice: minPrice = price
     if price < maxPrice:
         message = "Time to check the flight company; the flight is available for "+str(price)+" kroner.\nFollow this link for the search results: "+searchURL+"\nGo, go, go!"
-        print message
+        print (message)
         sendGmailMessage(username,password,message)
         return 
     print ('Min price for search was '+str(maxPrice)+'... better luck next time!')
@@ -71,19 +73,14 @@ def print_elm(element):
     return out
 
 def selenium_test(searchURL):
-    options = webdriver.ChromeOptions()
-    outputdir = "/var/log"
-    options.binary_location = '/usr/lib/chromium-browser/chromium-browser'
-    log_path = "{}/chromedriver.log".format(outputdir)
-    service_args = ['--verbose']
-    print (log_path)
 
-    browser = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver',   \
-        chrome_options=options,                                             \
-        service_args=service_args,                                          \
-        service_log_path=log_path)                                      
-    yahoo = browser.get(searchURL)
+    display = Display(visible=0, size=(1024, 768))
+    display.start()
+    
+    browser = webdriver.Firefox()#'/usr/bin/firefox/firefox'
     time.sleep(3)
+    yahoo = browser.get(searchURL)
+    time.sleep(5)
     price_elem =  browser.find_element_by_class_name('MHNSJI-d-zb')
     price = print_elm(price_elem)
     browser.quit()
@@ -107,8 +104,8 @@ if __name__ == "__main__":
         sys.exit('Could not find/parse email settings in config.txt')
     
     try:
-    	priceMax= parser.getfloat('searchSettings',"flightMaxPriceForEmail")
-	searchURL= parser.get('searchSettings',"searchURL",1)
+        priceMax= parser.getfloat('searchSettings',"flightMaxPriceForEmail")
+        searchURL= parser.get('searchSettings',"searchURL",1)
     except Exception:
         sys.exit('Could not find/parse search settings in config.txt')
 
